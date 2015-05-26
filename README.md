@@ -36,3 +36,6 @@ The timing are done using `boost::chrono` library and the statistics computed us
 
 - Also use steady_clock measurements
 - Support different logging output (stderr, stream, file, ...)
+- Allow paremetrisation of logging rate (every N calls, every N seconds, manually, ...)
+- Add preprocessor macro to disable it
+- Change name generation to something more specific (like adding line number) too differentiate same function / different scope calls
