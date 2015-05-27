@@ -14,7 +14,7 @@ To use it simply include it and use the correct macro in each function you want 
 
 void hot_function()
 {
-  FUNCTION_PROFILE()
+  PROFILE_FUNCTION()
   // ...
 }
 ```
