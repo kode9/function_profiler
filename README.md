@@ -9,7 +9,7 @@ function_profiler is a single header per-thread function profiler.
 To use it simply include it and use the correct macro in each function you want to profile:
 
 ```c++
-#include "function_profiler.h"
+#include "function_profiler.hpp"
 // ...
 
 void hot_function()
