@@ -111,6 +111,8 @@ private:
   function_profiler_stats &m_stats;
 };
 
+constexpr boost::chrono::seconds function_profiler_stats::report_interval;
+
 // Note: __func__ is not a preprocessor macro, it's a 'function-local
 // predefined variable' (char *), hence we don't expand it.
 #define PROFILE_FUNCTION()                              \
