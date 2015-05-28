@@ -1,14 +1,14 @@
 #ifndef function_profiler_h
 #define function_profiler_h
 
-// http://preshing.com/20111203/a-c-profiling-module-for-multithreaded-apis/
+/// Intrusive thread-safe function profiling
+/// @author Pierre-Luc Perrier <pluc@the-pluc.net>
+/// @version 0.2
+///
+/// Based on an idea by Jeff Preshing:
+/// http://preshing.com/20111203/a-c-profiling-module-for-multithreaded-apis/
 
 #include <boost/chrono.hpp>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/sum.hpp>
 
 #include <string> // std::string
 #include <thread> // std::this_thread::get_id
@@ -21,21 +21,15 @@ struct function_profiler_stats
   using clock           = boost::chrono::thread_clock;
   using duration        = clock::duration;
   using time_point      = clock::time_point;
-  using double_duration = boost::chrono::duration<double, duration::period>;
   using ms              = boost::chrono::duration<double, boost::milli>;
-
-  // Accumulator
-  using min_tag  = boost::accumulators::tag::min;
-  using max_tag  = boost::accumulators::tag::max;
-  using mean_tag = boost::accumulators::tag::mean;
-  using sum_tag  = boost::accumulators::tag::sum;
-  using features = boost::accumulators::features<min_tag, max_tag, mean_tag, sum_tag>;
 
   function_profiler_stats() = delete;
   function_profiler_stats(const std::string &name)
+    : m_accumulator{0}
+    , m_count{0}
   {
     std::ostringstream os;
-    os << "[function_profiler][" << std::hex << std::this_thread::get_id() << "][" << name << "]";
+    os << "[FP][" << std::hex << std::this_thread::get_id() << "][" << name << "]";
     m_prefix = os.str();
     m_last = m_last_report = clock::now();
   }
@@ -50,8 +44,9 @@ struct function_profiler_stats
   }
 
   inline void stop() {
+    ++m_count;
     const auto now = clock::now();
-    m_accumulator(duration{now - m_last}.count());
+    m_accumulator += now - m_last;
     m_last = std::move(now);
 
     // Check if we need to report current stats
@@ -63,20 +58,19 @@ struct function_profiler_stats
 
 private:
   inline void report() const {
-    std::printf("%s #%02lu, min %.5f, max %.5f, mean %.5f, total %.5f\n",
-                m_prefix.c_str(),
-                boost::accumulators::count(m_accumulator),
-                ms{duration{boost::accumulators::min(m_accumulator)}}.count(),
-                ms{duration{boost::accumulators::max(m_accumulator)}}.count(),
-                ms{double_duration{boost::accumulators::mean(m_accumulator)}}.count(),
-                ms{duration{boost::accumulators::sum(m_accumulator)}}.count());
+    if (m_count == 0) return;
+    auto ms_duration = ms{m_accumulator}.count();
+    std::printf("%s #%02lu, avg %.5Fms, tot %.5Fms\n",
+		m_prefix.c_str(), m_count, ms_duration / m_count, ms_duration);
   }
 
 private:
   static constexpr auto report_interval = boost::chrono::seconds{1};
 
-  ///< Statistics accumulator
-  boost::accumulators::accumulator_set<duration::rep, features> m_accumulator;
+  ///< Duration accumulator
+  duration m_accumulator;
+  ///< Number of samples
+  uint_least64_t m_count;
   ///< Last update
   time_point m_last;
   ///< Last report

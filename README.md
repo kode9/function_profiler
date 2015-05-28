@@ -29,7 +29,6 @@ The timing are done using `boost::chrono` library and the statistics computed us
 
 - `CMake > 2.8`
 - `boost::chrono`
-- `boost::accumulators`
 - A c++11 compiler supporting `thread_local` storage
 
 ## TODO
