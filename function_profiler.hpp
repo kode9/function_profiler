@@ -8,6 +8,8 @@
 /// Based on an idea by Jeff Preshing:
 /// http://preshing.com/20111203/a-c-profiling-module-for-multithreaded-apis/
 
+#ifdef FP_ENABLE
+
 #include <boost/chrono.hpp>
 
 #include <string> // std::string
@@ -112,5 +114,11 @@ constexpr boost::chrono::seconds function_profiler_stats::report_interval;
 #define PROFILE_FUNCTION()                              \
   thread_local function_profiler_stats info{__func__};  \
   function_profiler scoped_profiler{info};
+
+#else // !FB_ENABLE
+
+#define PROFILE_FUNCTION() static_cast<void>(0);
+
+#endif // FB_ENABLE
 
 #endif // function_profiler_h

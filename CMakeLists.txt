@@ -11,3 +11,7 @@ target_link_libraries(function_profiler INTERFACE ${Boost_LIBRARIES})
 
 find_package(Threads)
 target_link_libraries(function_profiler INTERFACE ${CMAKE_THREAD_LIBS_INIT})
+
+option(FP_ENABLE "Enable function_profiler" ON)
+target_compile_definitions(function_profiler INTERFACE $<$<BOOL:${FP_ENABLE}>:FP_ENABLE>)
+
