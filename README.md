@@ -6,14 +6,14 @@ function_profiler is a simple c++ header only library to profile
 function calls.
 
 It is an implementation of an idea of Jeff Preshing in
-[his blog]("http://preshing.com/20111203/a-c-profiling-module-for-multithreaded-apis/").
+[his blog](http://preshing.com/20111203/a-c-profiling-module-for-multithreaded-apis/).
 
 It allows you to measure the number of calls and the time spent in
 chosen functions, on a per-thread basis.
 
 It is not a replacement for full-fledged profiling frameworks such as
-[GNU gprof]("https://sourceware.org/binutils/docs/gprof/") or
-[Linux perf]("https://perf.wiki.kernel.org/index.php/Main_Page"), but
+[GNU gprof](https://sourceware.org/binutils/docs/gprof/) or
+[Linux perf](https://perf.wiki.kernel.org/index.php/Main_Page), but
 much easier to use.
 
 It does not collect statistical data on all functions, but rather time
@@ -58,8 +58,8 @@ it is not defined, the `FUNCTION_PROFILE` will not do anything.
 
 The idea relies on two simple things:
 
-- the `thread local` [storage duration specifier]("http://en.cppreference.com/w/cpp/language/storage_duration");
-- the RAII ([Resource Acquisition Is Initialization]("https://en.wikipedia.org/w/index.php?title=Resource_Acquisition_Is_Initialization")) concept.
+- the `thread local` [storage duration specifier](http://en.cppreference.com/w/cpp/language/storage_duration);
+- the RAII ([Resource Acquisition Is Initialization](https://en.wikipedia.org/w/index.php?title=Resource_Acquisition_Is_Initialization)) concept.
 
 
 The `PROFILE_FUNCTION` macro only instantiate two objects.
@@ -71,7 +71,7 @@ The second one is a local structure whose sole purpose is to update
 the statistics upon destruction.
 
 The timing are done using
-[`boost::chrono`]("http://www.boost.org/doc/libs/1_58_0/doc/html/chrono.html")
+[`boost::chrono`](http://www.boost.org/doc/libs/1_58_0/doc/html/chrono.html)
 library. Although the standard now has a `std::chrono` module, boost
 provides an additional `thread_clock` function.
 
