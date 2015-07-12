@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.1)
-project(function_profiler VERSION 0.2)
+project(function_profiler VERSION 0.3)
 
 add_library(function_profiler INTERFACE)
 target_compile_features(function_profiler INTERFACE cxx_thread_local cxx_constexpr cxx_auto_type)
