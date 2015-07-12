@@ -93,8 +93,7 @@ the calling thread.
 ## Licence
 
 This software is licenced under the
-[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0
-"Apache Licence 2.0")
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 <!--  LocalWords:  Preshing preprocessor
  -->
