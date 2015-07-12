@@ -1,9 +1,11 @@
 #include "function_profiler.hpp"
 #include "snippets.h"
 
+#include <chrono>
 #include <cstdint>
 #include <future>
 #include <iostream>
+#include <thread>
 
 namespace {
 
@@ -11,6 +13,9 @@ namespace {
 uint_least64_t suspicious_function(uint_least64_t n)
 {
   PROFILE_FUNCTION();
+
+  // This shows the difference between the thread and the steady clocks
+  std::this_thread::sleep_for(std::chrono::milliseconds(1));
   return fp::factorial(n);
 }
 
