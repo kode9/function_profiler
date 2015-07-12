@@ -24,6 +24,7 @@ struct collector {
   // Clocks
   using thread_clock = boost::chrono::thread_clock;
   using thread_time_point = thread_clock::time_point;
+  using thread_accumulator = boost::chrono::duration<uint_least64_t, thread_clock::period>;
 
   // The duration we use for the report.
   using report_duration = boost::chrono::duration<double, boost::milli>;
@@ -74,11 +75,11 @@ private:
 private:
   static constexpr auto report_interval = boost::chrono::seconds{1};
 
-  thread_time_point m_thread_last;             // Last thread clock time point
-  uint_least64_t m_count;                      // Number of samples
-  thread_clock::duration m_thread_accumulator; // Total thread clock duration
-  thread_time_point m_last_report;             // Last report
-  std::string m_prefix;                        // Prefix used when reporting
+  thread_time_point m_thread_last;         // Last thread clock time point
+  uint_least64_t m_count;                  // Number of samples
+  thread_accumulator m_thread_accumulator; // Total thread clock duration
+  thread_time_point m_last_report;         // Last report
+  std::string m_prefix;                    // Prefix used when reporting
 };
 
 // RAII structure responsible to update a collector
