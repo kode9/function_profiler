@@ -83,11 +83,18 @@ the calling thread.
 
 ## TODO
 
+- Add option to disable `thread_lock` and use `std::steady_clock` to remove boost dependency.
+- Implement `thread_clock` to allow `thread_clock` without boost
 - Support different logging output (stderr, stream, file, ...)
 - Allow paremetrisation of logging rate (every N calls, every N seconds, manually, ...)
-- Add preprocessor macro to disable it
 - Change name generation to something more specific (like adding line number) too differentiate same function / different scope calls
 - README: scoped profiling
+
+## Licence
+
+This software is licenced under the
+[Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0
+"Apache Licence 2.0")
 
 <!--  LocalWords:  Preshing preprocessor
  -->
