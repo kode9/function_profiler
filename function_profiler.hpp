@@ -26,16 +26,25 @@ struct collector {
   using thread_time_point = thread_clock::time_point;
   using thread_accumulator = boost::chrono::duration<uint_least64_t, thread_clock::period>;
 
+  using steady_clock = boost::chrono::steady_clock;
+  using steady_time_point = steady_clock::time_point;
+  using steady_accumulator = boost::chrono::duration<uint_least64_t, steady_clock::period>;
+
   // The duration we use for the report.
   using report_duration = boost::chrono::duration<double, boost::milli>;
 
   collector() = delete;
-  collector(const std::string &name) : m_count{0}, m_thread_accumulator{0}
+  collector(const std::string &name)
+    : m_thread_last{thread_clock::now()},
+      m_steady_last{steady_clock::now()},
+      m_count{0},
+      m_thread_accumulator{0},
+      m_steady_accumulator{0},
+      m_last_report{steady_clock::now()}
   {
     std::ostringstream os;
     os << "[FP][" << std::hex << std::this_thread::get_id() << "][" << name << "]";
     m_prefix = os.str();
-    m_thread_last = m_last_report = thread_clock::now();
   }
 
   // We also report upon destruction. Note: this is probably a bad
@@ -48,18 +57,27 @@ struct collector {
   inline void start() noexcept
   {
     m_thread_last = thread_clock::now();
+    m_steady_last = steady_clock::now();
   }
 
   inline void stop()
   {
     ++m_count;
-    const auto now = thread_clock::now();
-    m_thread_accumulator += now - m_thread_last;
-    m_thread_last = std::move(now);
+
+    {
+      const auto now = thread_clock::now();
+      m_thread_accumulator += now - m_thread_last;
+      m_thread_last = std::move(now);
+    }
+    {
+      const auto now = steady_clock::now();
+      m_steady_accumulator += now - m_steady_last;
+      m_steady_last = std::move(now);
+    }
 
     // Check if we need to report current stats
-    if (m_thread_last - m_last_report > report_interval) {
-      m_last_report = m_thread_last;
+    if (m_steady_last - m_last_report > report_interval) {
+      m_last_report = m_steady_last;
       report();
     }
   }
@@ -68,17 +86,21 @@ private:
   inline void report() const
   {
     if (m_count == 0) return;
-    auto ms = report_duration{m_thread_accumulator}.count();
-    std::printf("%s #%02lu, avg %.5Fms, tot %.5Fms\n", m_prefix.c_str(), m_count, ms / m_count, ms);
+    const auto thread_ms = report_duration{m_thread_accumulator}.count();
+    const auto steady_ms = report_duration{m_steady_accumulator}.count();
+    std::printf("%s #%02lu, thread_avg %.5Fms, thread_tot %.5Fms, steady_avg %.5Fms, steady_tot %.5Fms\n",
+                m_prefix.c_str(), m_count, thread_ms / m_count, thread_ms, steady_ms / m_count, steady_ms);
   }
 
 private:
   static constexpr auto report_interval = boost::chrono::seconds{1};
 
   thread_time_point m_thread_last;         // Last thread clock time point
+  steady_time_point m_steady_last;         // Last steady clock time point
   uint_least64_t m_count;                  // Number of samples
   thread_accumulator m_thread_accumulator; // Total thread clock duration
-  thread_time_point m_last_report;         // Last report
+  steady_accumulator m_steady_accumulator; // Total steady clock duration
+  steady_time_point m_last_report;         // Last report
   std::string m_prefix;                    // Prefix used when reporting
 };
 
