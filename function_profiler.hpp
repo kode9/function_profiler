@@ -17,42 +17,48 @@
 #include <cstdio> // std::printf
 #include <ios>    // std::hex
 
-struct function_profiler_stats {
-  // Clock
-  using clock = boost::chrono::thread_clock;
-  using duration = clock::duration;
-  using time_point = clock::time_point;
-  using ms = boost::chrono::duration<double, boost::milli>;
+namespace fp {
 
-  function_profiler_stats() = delete;
-  function_profiler_stats(const std::string &name) : m_accumulator{0}, m_count{0}
+// Main structure used to collect data
+struct collector {
+  // Clocks
+  using thread_clock = boost::chrono::thread_clock;
+  using thread_time_point = thread_clock::time_point;
+
+  // The duration we use for the report.
+  using report_duration = boost::chrono::duration<double, boost::milli>;
+
+  collector() = delete;
+  collector(const std::string &name) : m_count{0}, m_thread_accumulator{0}
   {
     std::ostringstream os;
     os << "[FP][" << std::hex << std::this_thread::get_id() << "][" << name << "]";
     m_prefix = os.str();
-    m_last = m_last_report = clock::now();
+    m_thread_last = m_last_report = thread_clock::now();
   }
 
-  ~function_profiler_stats()
+  // We also report upon destruction. Note: this is probably a bad
+  // idea.
+  ~collector() noexcept
   {
     report();
   }
 
   inline void start() noexcept
   {
-    m_last = clock::now();
+    m_thread_last = thread_clock::now();
   }
 
   inline void stop()
   {
     ++m_count;
-    const auto now = clock::now();
-    m_accumulator += now - m_last;
-    m_last = std::move(now);
+    const auto now = thread_clock::now();
+    m_thread_accumulator += now - m_thread_last;
+    m_thread_last = std::move(now);
 
     // Check if we need to report current stats
-    if (m_last - m_last_report > report_interval) {
-      m_last_report = m_last;
+    if (m_thread_last - m_last_report > report_interval) {
+      m_last_report = m_thread_last;
       report();
     }
   }
@@ -61,50 +67,53 @@ private:
   inline void report() const
   {
     if (m_count == 0) return;
-    auto ms_duration = ms{m_accumulator}.count();
-    std::printf("%s #%02lu, avg %.5Fms, tot %.5Fms\n", m_prefix.c_str(), m_count, ms_duration / m_count, ms_duration);
+    auto ms = report_duration{m_thread_accumulator}.count();
+    std::printf("%s #%02lu, avg %.5Fms, tot %.5Fms\n", m_prefix.c_str(), m_count, ms / m_count, ms);
   }
 
 private:
   static constexpr auto report_interval = boost::chrono::seconds{1};
 
-  duration m_accumulator;   // Duration accumulator
-  uint_least64_t m_count;   // Number of samples
-  time_point m_last;        // Last update
-  time_point m_last_report; // Last report
-  std::string m_prefix;     // Prefix used when reporting
+  thread_time_point m_thread_last;             // Last thread clock time point
+  uint_least64_t m_count;                      // Number of samples
+  thread_clock::duration m_thread_accumulator; // Total thread clock duration
+  thread_time_point m_last_report;             // Last report
+  std::string m_prefix;                        // Prefix used when reporting
 };
 
-struct function_profiler {
+// RAII structure responsible to update a collector
+struct scoped_profiler {
 public:
-  function_profiler(function_profiler_stats &stats) : m_stats{stats}
+  scoped_profiler(collector &collector_) : m_collector{collector_}
   {
-    m_stats.start();
+    m_collector.start();
   }
 
-  ~function_profiler()
+  ~scoped_profiler()
   {
-    m_stats.stop();
+    m_collector.stop();
   }
 
-  function_profiler() = delete;
-  function_profiler(const function_profiler &) = delete;
-  function_profiler(function_profiler &&) = delete;
+  scoped_profiler() = delete;
+  scoped_profiler(const scoped_profiler &) = delete;
+  scoped_profiler(scoped_profiler &&) = delete;
 
-  function_profiler &operator=(const function_profiler &) = delete;
-  function_profiler &operator=(function_profiler &&) = delete;
+  scoped_profiler &operator=(const scoped_profiler &) = delete;
+  scoped_profiler &operator=(scoped_profiler &&) = delete;
 
 private:
-  function_profiler_stats &m_stats;
+  collector &m_collector;
 };
 
-constexpr boost::chrono::seconds function_profiler_stats::report_interval;
+constexpr boost::chrono::seconds collector::report_interval;
+
+} // namespace fp
 
 // Note: __func__ is not a preprocessor macro, it's a 'function-local
 // predefined variable' (char *), hence we don't expand it.
 #define PROFILE_FUNCTION()                                                                                             \
-  thread_local function_profiler_stats info{__func__};                                                                 \
-  function_profiler scoped_profiler{info};
+  thread_local fp::collector info{__func__};                                                                           \
+  fp::scoped_profiler scoped_profiler{info};
 
 #else // !FB_ENABLE
 
