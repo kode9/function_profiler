@@ -30,7 +30,7 @@ struct collector {
   using steady_time_point = steady_clock::time_point;
   using steady_accumulator = boost::chrono::duration<uint_least64_t, steady_clock::period>;
 
-  // The duration we use for the report.
+  // The duration we use for the report
   using report_duration = boost::chrono::duration<double, boost::milli>;
 
   collector() = delete;
@@ -43,8 +43,9 @@ struct collector {
       m_last_report{steady_clock::now()}
   {
     std::ostringstream os;
-    os << "[FP][" << std::hex << std::this_thread::get_id() << "][" << name << "]";
-    m_prefix = os.str();
+    os << "[FP] " << std::hex << std::this_thread::get_id() << " " << name
+       << " #%02lu, %.5Fms, %.5Fms, %.5Fms, %.5Fms\n";
+    m_fmt = os.str();
   }
 
   // We also report upon destruction. Note: this is probably a bad
@@ -88,8 +89,7 @@ private:
     if (m_count == 0) return;
     const auto thread_ms = report_duration{m_thread_accumulator}.count();
     const auto steady_ms = report_duration{m_steady_accumulator}.count();
-    std::printf("%s #%02lu, thread_avg %.5Fms, thread_tot %.5Fms, steady_avg %.5Fms, steady_tot %.5Fms\n",
-                m_prefix.c_str(), m_count, thread_ms / m_count, thread_ms, steady_ms / m_count, steady_ms);
+    std::printf(m_fmt.c_str(), m_count, steady_ms / m_count, thread_ms / m_count, steady_ms, thread_ms);
   }
 
 private:
@@ -101,7 +101,7 @@ private:
   thread_accumulator m_thread_accumulator; // Total thread clock duration
   steady_accumulator m_steady_accumulator; // Total steady clock duration
   steady_time_point m_last_report;         // Last report
-  std::string m_prefix;                    // Prefix used when reporting
+  std::string m_fmt;                       // Format used for reporting
 };
 
 // RAII structure responsible to update a collector

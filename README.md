@@ -42,12 +42,11 @@ compiler can find it, include it in your source and add call the
 After a profiled function call it will print a report if enough time
 has elapsed since the last one:
 
-	[FP][7ff2599ff700][hot_function] #503, avg 0.27804ms, tot 139.85309ms
-	[FP][7ff2599ff700][hot_function] #532, avg 0.27803ms, tot 147.91211ms
+	[FP] 7f973af18700 suspicious_function #932, 1.07303ms, 0.01715ms, 1000.06362ms, 15.98633ms
 
 The report has the following structure:
 
-	[FP][<thread_id>][<function_name>] #<number_of_calls>, avg <average_duration>, tot <total_duration>
+	[FP] thread_id function_name number_of_calls steady_average cpu_average steady_total cpu_total
 
 ### Controlling behavior
 
@@ -73,7 +72,8 @@ the statistics upon destruction.
 The timing are done using
 [`boost::chrono`](http://www.boost.org/doc/libs/1_58_0/doc/html/chrono.html)
 library. Although the standard now has a `std::chrono` module, boost
-provides an additional `thread_clock` function.
+provides an additional `thread_clock` function that gives CPU time for
+the calling thread.
 
 ## Dependencies
 
@@ -83,11 +83,11 @@ provides an additional `thread_clock` function.
 
 ## TODO
 
-- Also use steady_clock measurements: thread_chrono does not provide information about sleeping time.
 - Support different logging output (stderr, stream, file, ...)
 - Allow paremetrisation of logging rate (every N calls, every N seconds, manually, ...)
 - Add preprocessor macro to disable it
 - Change name generation to something more specific (like adding line number) too differentiate same function / different scope calls
+- README: scoped profiling
 
 <!--  LocalWords:  Preshing preprocessor
  -->

@@ -23,12 +23,13 @@ target_compile_definitions(function_profiler INTERFACE $<$<BOOL:${FP_ENABLE}>:FP
 find_package(Threads)
 
 add_library(snippets SHARED examples/snippets.cpp)
+target_include_directories(snippets INTERFACE examples)
 set_property(TARGET snippets PROPERTY CXX_STANDARD 11)
 set_property(TARGET snippets PROPERTY CXX_EXTENSIONS OFF)
 set_property(TARGET snippets PROPERTY CXX_STANDARD_REQUIRED ON)
 target_compile_options(snippets PUBLIC -Wall -Wextra -Wpedantic -Werror)
 target_link_libraries(snippets INTERFACE function_profiler)
 
-add_executable(basic examples/basic.cpp)
+add_executable(basic EXCLUDE_FROM_ALL examples/basic.cpp)
 target_link_libraries(basic snippets)
 target_link_libraries(basic Threads::Threads)
