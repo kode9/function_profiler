@@ -145,8 +145,8 @@ constexpr boost::chrono::seconds collector::report_interval;
 // Note: __func__ is not a preprocessor macro, it's a 'function-local
 // predefined variable' (char *), hence we don't expand it.
 #define PROFILE_FUNCTION()                                                                                             \
-  thread_local fp::collector info{__func__};                                                                           \
-  fp::scoped_profiler scoped_profiler{info};
+  thread_local fp::collector fp_info_fp{__func__};                                                                     \
+  fp::scoped_profiler fp_scoped_profiler_fp{fp_info_fp};
 
 #else // !FB_ENABLE
 
