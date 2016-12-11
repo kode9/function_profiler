@@ -28,25 +28,25 @@ want to profile.
 
 To start profiling functions, drop the single header where your
 compiler can find it, include it in your source and add call the
-`FUNCTION_PROFILE` macro in ant function:
+`FUNCTION_PROFILE` macro in any function:
 
 	#include "function_profiler.hpp"
 	// ...
 
-	void suspicious_function()
+	void function()
 	{
 	  PROFILE_FUNCTION()
 	  // ...
 	}
 
 After a profiled function call it will print a report if enough time
-has elapsed since the last one:
+has elapsed since the last report:
 
 	[FP] 7fb2a5dfd700 function #40960    1.06712  0.01157  43709.3171    473.9214
 
 The report has the following structure:
 
-	[FP] thread_id function_name number_of_calls steady_average cpu_average steady_total cpu_total
+	[FP] <thread> <function_name> <number_of_calls> <steady_average> <cpu_average> <steady_total> <cpu_total>
 
 ### Controlling behavior
 
@@ -59,7 +59,6 @@ The idea relies on two simple things:
 
 - the `thread local` [storage duration specifier](http://en.cppreference.com/w/cpp/language/storage_duration);
 - the RAII ([Resource Acquisition Is Initialization](https://en.wikipedia.org/w/index.php?title=Resource_Acquisition_Is_Initialization)) concept.
-
 
 The `PROFILE_FUNCTION` macro only instantiate two objects.
 
@@ -94,6 +93,3 @@ the calling thread.
 
 This software is licenced under the
 [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0)
-
-<!--  LocalWords:  Preshing preprocessor
- -->
