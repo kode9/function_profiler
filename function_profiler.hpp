@@ -2,7 +2,7 @@
 // https://git.the-pluc.net/function_profiler.git/
 // Version 0.3
 //
-// Copyright (C) 2015  Pierre-Luc Perrier <pluc@the-pluc.net>
+// Copyright (C) 2015, 2016 Pierre-Luc Perrier <pluc@the-pluc.net>
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +23,10 @@
 
 #include <boost/chrono.hpp>
 
-#include <string> // std::string
-#include <thread> // std::this_thread::get_id
 #include <cstdio> // std::printf
 #include <ios>    // std::hex
+#include <string> // std::string
+#include <thread> // std::this_thread::get_id
 
 namespace fp {
 
@@ -54,8 +54,7 @@ struct collector {
       m_last_report{steady_clock::now()}
   {
     std::ostringstream os;
-    os << "[FP] " << std::hex << std::this_thread::get_id() << " " << name
-       << " #%02lu, %.5Fms, %.5Fms, %.5Fms, %.5Fms\n";
+    os << "[FP] " << std::hex << std::this_thread::get_id() << " " << name << " #%-7lu %8.5F %8.5F %11.4F %11.4F\n";
     m_fmt = os.str();
   }
 

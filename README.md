@@ -42,7 +42,7 @@ compiler can find it, include it in your source and add call the
 After a profiled function call it will print a report if enough time
 has elapsed since the last one:
 
-	[FP] 7f973af18700 suspicious_function #932, 1.07303ms, 0.01715ms, 1000.06362ms, 15.98633ms
+	[FP] 7fb2a5dfd700 function #40960    1.06712  0.01157  43709.3171    473.9214
 
 The report has the following structure:
 
